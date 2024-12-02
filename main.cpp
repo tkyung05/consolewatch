@@ -45,9 +45,35 @@ void init()
 	console = new wchar_t[CONSOLE_W * CONSOLE_H];
 	buffer = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(buffer);
+	fill(console, console + CONSOLE_W * CONSOLE_H, L' ');
 
 	tp_s = chrono::system_clock::now();
 	tp_e = chrono::system_clock::now();
+}
+
+void startOpening()
+{
+	const vector<wstring> TEXT = {
+		L"                                 _                         _          _     ",
+		L"                                | |                       | |        | |    ",
+		L"  ___   ___   _ __   ___   ___  | |  ___ __      __  __ _ | |_   ___ | |__  ",
+		L" / __| / _ \\ | '_ \\ / __| / _ \\ | | / _ \\\\ \\ /\\ / / / _` || __| / __|| '_ \\ ",
+		L"| (__ | (_) || | | |\\__ \\| (_) || ||  __/ \\ V  V / | (_| || |_ | (__ | | | |",
+		L" \\___| \\___/ |_| |_||___/ \\___/ |_| \\___|  \\_/\\_/   \\__,_| \\__| \\___||_| |_|",
+		L"                                                                            ",
+		L"                                                                            "
+	};
+
+	int topPadding = (CONSOLE_H - TEXT.size()) / 2;
+	int leftPadding = (CONSOLE_W - TEXT[0].length()) / 2;
+
+	for (int i = 0; i < TEXT.size(); ++i) 
+		for (int j = 0; j < TEXT[i].length(); ++j)
+			console[(topPadding + i) * CONSOLE_W + (leftPadding + j)] = TEXT[i][j];
+
+	WriteConsoleOutputCharacter(buffer, console, CONSOLE_W * CONSOLE_H, { 0, 0 }, &bw);
+
+	Sleep(3000);
 }
 
 void frameUpdate()
@@ -182,6 +208,7 @@ void control()
 int main()
 {
 	init();
+	startOpening();
 	createWorld();
 
 	while (1)
@@ -203,7 +230,8 @@ int main()
 			for (int y = 0; y < CONSOLE_H; y++)
 				render(x, y, distanceToWall, isCorner);
 		}
-
+		
+		swprintf_s(console, 27, L"W - S: MOVE, A - D: ROTATE");
 		WriteConsoleOutputCharacter(buffer, console, CONSOLE_W * CONSOLE_H, { 0, 0 }, &bw);
 	}
 
